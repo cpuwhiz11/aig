@@ -305,7 +305,6 @@ qx.Class.define("aiagallery.Application",
       // Iterate through their labels to find the tab
       for (var i in tabArray)
       {
-        var label = tabArray[i].getLabel();
         if(tabArray[i].getLabel() == moduleName)
         {
           // Select Module
@@ -316,8 +315,24 @@ qx.Class.define("aiagallery.Application",
             aiagallery.main.Gui.getInstance().getUserData("hierarchy");
           
           // Reinitialize the hierarchy to show only this page
-          hierarchy.setHierarchy([ tabArray[i].getLabel() ]);
-         
+          hierarchy.setHierarchy([tabArray[i].getLabel()]);
+
+          // Get the page selector bar
+          var pageSelectorBar =
+            aiagallery.main.Gui.getInstance().getUserData("pageSelectorBar");
+
+          // Get children
+          pageArray = pageSelectorBar.getChildren();
+          
+          for (var j in pageArray)
+          {
+            if (pageArray[i].getLabel() == moduleName)
+            {
+              // Select the page
+              pageSelectorBar.setSelection([pageArray[i]]);
+            }
+          }
+     
           return;           
         }
       }
