@@ -192,18 +192,27 @@ qx.Class.define("aiagallery.Application",
       var state = this.__history.getState();
       var name = state.replace(/_/g, " ");
 
-      var code = "";
-
       // checks if the state corresponds to a main tab. If yes, the application
       // will be initialized with the selected main tab
-      if (false)
+      var isState = false;
+
+      for (var i in moduleList)
+      {
+        var label = moduleList[i].getlabel(); 
+        if (moduleList[i] == state) 
+        {
+          isState = true;      
+        }
+      }
+
+      if (isState)
       {
         this.__selectModule(moduleName);
         return;
         
-      // if no state is given default to home page
+      // if no state is given or the state is not found default to home page
       } else {
-        this.__selectModule("Find Apps"); 
+        this.__selectModule("Home"); 
         return;
       }
     },
@@ -291,15 +300,8 @@ qx.Class.define("aiagallery.Application",
     {
       var mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");  
       var tabArray;
-      
-      // If moduleName is "Home" set that immediately and return
-      if (moduleName == "Home")
-      {
-        //mainTabs.setSelection("Home");
-        //return;   
-      }
-      
-      // Else get the children
+
+      // get the children
       tabArray = mainTabs.getChildren();
       
       // Iterate through their labels to find the tab
@@ -337,8 +339,7 @@ qx.Class.define("aiagallery.Application",
         }
       }
       
-      // Never found module name select homepage.  
-      //mainTabs.setSelection("Home");
+      // TODO Never found page
       
       return; 
       
