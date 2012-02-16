@@ -51,6 +51,9 @@
  * @param bNewInstance {Boolean?false}
  *   If true, must instantiate a new instance of the module; otherwise, the
  *   module is a singleton, so its one instance is retrieved
+ *
+ * @param queryString {String}
+ *    A name for this module that is not specific to a language
  */
 qx.Class.define("aiagallery.main.Module",
 {
@@ -61,7 +64,8 @@ qx.Class.define("aiagallery.main.Module",
                        moduleName,
                        clazz,
                        functionList,
-                       bNewInstance)
+                       bNewInstance,
+                       queryString)
   {
     this.base(arguments);
 
@@ -91,6 +95,10 @@ qx.Class.define("aiagallery.main.Module",
 
     // Add this new module to the module list.
     aiagallery.main.Module._list[menuItem][moduleName] = this;
+    
+    // Add the language indepent module name
+    this.queryString = queryString; 
+    //aiagallery.main.Module._list[menuItem]["queryString"] = queryString;  
     
     // Specify whether this is to be a new instantiation or a singleton
     this.bNewInstance = !!bNewInstance;

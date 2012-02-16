@@ -27,6 +27,9 @@ qx.Class.define("aiagallery.main.Constant",
     [ 
       "application/vnd.android.package-archive",
       "application/octet-stream"
-    ]
+    ],
+    
+    PAGE_NAME_CONSTANTS : ["Home", "Find Apps", "My Apps", 
+                           "Testing", "Management", "AppPage"]
   }
 });
