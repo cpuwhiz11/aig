@@ -418,12 +418,12 @@ qx.Class.define("aiagallery.main.Gui",
             // Load the Channel API. If we're on App Engine, it'll succeed
             var loader = new qx.bom.request.Script();
             loader.onload = 
-              function createChannel(status)
+              function createChannel()
               {
                 // Did we successfully load the Channel API?
-                switch(status)
+                switch(loader.status)
                 {
-                case "success":
+                case 200:
                   // Found the Channel API. Reqest a server push channel
                   rpc.callAsync(
                     function(e)
@@ -503,7 +503,7 @@ qx.Class.define("aiagallery.main.Gui",
                         channelMessage("close", data);
                         
                         // Re-establish the channel
-                        createChannel("success");
+                        createChannel();
                       };
 
                       // Save the channel token (if provided)
@@ -515,7 +515,7 @@ qx.Class.define("aiagallery.main.Gui",
 
                   default:
                     // Nope.
-                  _this.warn(status + ": Failed to load Channel API");
+                  _this.warn(loader.status + ": Failed to load Channel API");
                   break;
 
                 }
@@ -727,6 +727,11 @@ qx.Class.define("aiagallery.main.Gui",
           hierarchy.setHierarchy(
             qx.lang.Array.clone(hierarchy.getHierarchy()));
           
+          // FIXME: Remove this item from the Module list too. effectively
+          // do this: delete aiagallery.main.Module._list[menuItem] (but
+          // create some function in the Module class to do it.
+          // See also issue #52 for an alternative solution.
+
           // There can only ever be one ephemeral page. See ya!
           break;
         }

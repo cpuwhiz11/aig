@@ -17,6 +17,9 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
 
   members :
   {
+    /** Whether FSM events should be temporarily prevented */
+    __bPreventFsmEvent : false,
+
     /**
      * Build the raw graphical user interface.
      *
@@ -45,6 +48,29 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
       
       // The search area is a tabview, for selecting the type of search
       tabView = new aiagallery.widget.radioview.RadioView();
+      tabView.addListener(
+        "changeSelection",
+        function(e)
+        {
+          // Determine which page was selected
+          if (e.getTarget().getSelection()[0] == this.pageTextSearch)
+          {
+            // It's the text search page, so clear the advanced page
+            this._clearAdvanced();
+          }
+          else
+          {
+            // The advanced page was selected, so clear text search field
+            this.txtTextSearch.setValue("");
+          }
+          
+          // Clear out the search results with an empty model
+          if (this.searchResults)
+          {
+            this.searchResults.setModel(qx.data.marshal.Json.createModel([]));
+          }
+        },
+        this);
 
       // Use a single row for subtabs
       tabView.setRowCount(1);
@@ -53,25 +79,23 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
       tabView.getChildControl("pane").setDynamic(true);
       
       // Add the search option pages
-      o = new aiagallery.widget.radioview.Page(this.tr("Text search"));
-      o.set(
+      this.pageTextSearch =
+        new aiagallery.widget.radioview.Page(this.tr("Text search"));
+      this.pageTextSearch.set(
         {
           layout    : new qx.ui.layout.VBox()
         });
-//      this._addTextSearch(o);
-      tabView.add(o);
+      this._addTextSearch(this.pageTextSearch);
+      tabView.add(this.pageTextSearch);
       
-      o = new aiagallery.widget.radioview.Page(this.tr("Browse categories"));
-      this._addCategoryBrowser(o);
-      tabView.add(o);
-      
-      o = new aiagallery.widget.radioview.Page(this.tr("Advanced"));
-      o.set(
+      this.pageAdvanced =
+        new aiagallery.widget.radioview.Page(this.tr("Advanced"));
+      this.pageAdvanced.set(
         {
           layout    : new qx.ui.layout.VBox()
         });
-      this._addAdvancedSearch(o);
-      tabView.add(o);
+      this._addAdvancedSearch(this.pageAdvanced);
+      tabView.add(this.pageAdvanced);
       
       // Add the tabView to the top of the vBox
       vBox.add(tabView);
@@ -102,7 +126,8 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
           {
             createItem : function()
             {
-              return new aiagallery.module.dgallery.findapps.SearchResult();
+              var             FindApps = aiagallery.module.dgallery.findapps;
+              return new FindApps.SearchResult("searchResult");
             },
             
             bindItem : function(controller, item, id) 
@@ -139,13 +164,128 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
       vBox.add(this.searchResults, { flex : 1 });
     },
 
-    _addCategoryBrowser : function(container)
+    _clearAdvanced : function()
     {
-      var             list;
+      // Remove all selections from the category browser
+      [
+        "browse0",
+        "browse1",
+        "browse2"
+      ].forEach(
+        function(listName)
+        {
+          var             list;
+          
+          // Do not cause searches to occur while clearing the lists
+          this.__bPreventFsmEvent = true;
+
+          list = this.__fsm.getObject(listName);
+          if (list)
+          {
+            list.setSelection( [] );
+          }
+          
+          // Allow normal FSM events again
+          this.__bPreventFsmEvent = false;
+        },
+        this);
+
+      // Clear out the search criteria too
+      if (this.butClear)
+      {
+        this.butClear.execute();
+      }
+    },
+
+    _addTextSearch : function(container)
+    {
       var             hBox;
+      var             description;
+      var             font;
+
+      container.setLayout(new qx.ui.layout.VBox(10));
       
+      // Indent the text using an HBox and spacer
+      hBox = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+      container.add(hBox);
+
+      // Describe what this search does
+      hBox.add(new qx.ui.core.Spacer(16, 10));
+      font = qx.bom.Font.fromString("10px sans-serif bold");
+      description = 
+        new qx.ui.basic.Label(this.tr("Search for words found in the title, " +
+                                      "description, categories, or tags."));
+      description.set(
+        {
+          font : font
+        });
+      hBox.add(description);
+      
+      // Create a horizontal box for the simple text search fields
+      hBox = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+      container.add(hBox);
+
+      // Indent the search fields a bit
+      hBox.add(new qx.ui.core.Spacer(16, 10));
+
+      // Create the text input field
+      this.txtTextSearch = new qx.ui.form.TextField();
+      this.txtTextSearch.set(
+        {
+          width : 300
+        });
+      this.txtTextSearch.addListener("input", this._clearAdvanced, this);
+      this.__fsm.addObject("txtTextSearch", this.txtTextSearch);
+      hBox.add(this.txtTextSearch);
+      
+      // Create the button for initiating the search
+      this.butTextSearch = new qx.ui.form.Button(this.tr("Search"));
+      this.butTextSearch.set(
+        {
+          maxHeight : 20
+        });
+      hBox.add(this.butTextSearch);
+      this.__fsm.addObject("butTextSearch", this.butTextSearch);
+      this.butTextSearch.addListener("execute",
+                                     this.__fsm.eventListener,
+                                     this.__fsm);
+    },
+
+    _addAdvancedSearch : function(container)
+    {
+      var             vBox;
+      var             hBox;
+      var             font;
+      var             label;
+      var             searchCriteriaArr = [];
+
       // Put the three lists into a horizontal box
       container.setLayout(new qx.ui.layout.HBox(0));
+
+      // Create a vBox to hold the category browser label and lists
+      vBox = new qx.ui.container.Composite();
+      vBox.setLayout(new qx.ui.layout.VBox());
+      container.add(vBox);
+      
+      // Add the label. Indent the text using an HBox and spacer.
+      hBox = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+      vBox.add(hBox);
+
+      // Add the label
+      hBox.add(new qx.ui.core.Spacer(16, 10));
+      font = qx.bom.Font.fromString("10px sans-serif bold");
+      label = 
+        new qx.ui.basic.Label(this.tr("Browse categories"));
+      label.set(
+        {
+          font : font
+        });
+      hBox.add(label);
+
+      // Create the hbox for the browser lists. Indent those lists.
+      hBox = new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
+      hBox.add(new qx.ui.core.Spacer(24, 10));
+      vBox.add(hBox);
 
       // create and add the lists.
       [
@@ -155,33 +295,63 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
       ].forEach(
         function(listName)
         {
+          var             list;
+
           list = new qx.ui.form.List();
           list.set(
             {
-              width  : 150,
-              height : 100
+              width  : 130,
+              height : 124
             });
-          list.addListener("changeSelection",
-                           this.__fsm.eventListener,
-                           this.__fsm);
-          container.add(list);
+          
+          list.addListener(
+            "changeSelection",
+            function(e)
+            {
+              // If we got here from a different event handler...
+              if (this.__bPreventFsmEvent)
+              {
+                // then do nothing
+                return;
+              }
+
+              // Make a change to the search criteria without generating an
+              // FSM event. The event will be generated afterwards
+              this.__bPreventFsmEvent = true;
+
+              // Add a new criterion
+              this.butClear.execute();
+//              butAddCriterion.execute();
+
+              // Ok, allow FSM events from the search criteria again
+              this.__bPreventFsmEvent = false;
+
+              qx.lang.Function.bind(
+                this.__fsm.eventListener, this.__fsm)(e);
+            },
+            this);
+
+          hBox.add(list);
           this.__fsm.addObject(listName, list);
         },
         this);
 
       // Add a spacer to take up the remaining space in the hbox
-      container.add(new qx.ui.core.Spacer(), { flex : 1 });
-    },
-
-    _addAdvancedSearch : function(container)
-    {
-      var             vbox;
-      var             searchCriteriaArr = [];
+      container.add(new qx.ui.core.Spacer(20, 10));
 
       // Begin creating the search gui
       // vbox contains the whole rest of the shabang
-      vbox = new qx.ui.container.Composite();
-      vbox.setLayout(new qx.ui.layout.VBox()) ;
+      vBox = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+
+      // Add the label
+      font = qx.bom.Font.fromString("10px sans-serif bold");
+      label = 
+        new qx.ui.basic.Label(this.tr("Search Criteria"));
+      label.set(
+        {
+          font : font
+        });
+      vBox.add(label);
 
       // criteria will house all of the "lines of refinement"
       var criteria = new qx.ui.container.Composite();
@@ -207,7 +377,9 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
       var searchWrapper = new qx.core.Object();
       searchWrapper.setUserData("array", searchCriteriaArr);
       searchWrapper.setUserData("widget",criteria);
-      searchWrapper.setUserData("buildRefineFunc", this.buildSearchRefineLine);
+      searchWrapper.setUserData(
+        "buildRefineFunc", 
+        qx.lang.Function.bind(this.buildSearchRefineLine, this));
       
       // Going to need access in reset function to this object by the criteria
       criteria.setUserData("searchObject", searchWrapper);
@@ -219,18 +391,47 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
       criteria.add(myRefineLine.widget);
       
       // buttonbar is where the search, reset, and possibly more buttons go
-      var buttonbar = new qx.ui.container.Composite();
-      buttonbar.set(
+      var buttonbar = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+      
+      var butSearch = new qx.ui.form.Button(this.tr("Search"));
+      butSearch.set(
         {
-          layout         : new qx.ui.layout.HBox()
+          width : 100
         });
+      this.__fsm.addObject("butAdvSearch", butSearch);
+      butSearch.addListener(
+        "execute",
+        function(e)
+        {
+          // If we got here from a different event handler...
+          if (this.__bPreventFsmEvent)
+          {
+            // then do nothing
+            return;
+          }
+
+          // Make a change to the search criteria without generating an
+          // FSM event. The event will be generated afterwards
+          this.__bPreventFsmEvent = true;
+
+          qx.lang.Function.bind(
+            this.__fsm.eventListener, this.__fsm)(e);
+
+          // Ok, allow FSM events from the search criteria again
+          this.__bPreventFsmEvent = false;
+        },
+        this);
+      buttonbar.add(butSearch);
       
-      var searchbtn = new qx.ui.form.Button("Search On This");
-      this.__fsm.addObject("searchBtn", searchbtn);
-      searchbtn.addListener("execute", this.__fsm.eventListener, this.__fsm);
-      
-      var resetbtn = new qx.ui.form.Button("Reset All Fields");
-      resetbtn.addListener(
+      // Separate the Search button from the others
+      buttonbar.add(new qx.ui.core.Spacer(40, 10));
+
+      this.butClear = new qx.ui.form.Button(this.tr("Clear"));
+      this.butClear.set(
+        {
+          width : 100
+        });
+      this.butClear.addListener(
         "execute",
         function() 
         {
@@ -249,11 +450,17 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
         },
         // Pass criteria widget as context so we can access (and clean) it.  
         criteria);
+      buttonbar.add(this.butClear);
       
-      var addcriteriabtn = new qx.ui.form.Button("Add Search Criteria");
+      var butAddCriterion =
+        new qx.ui.form.Button(this.tr("Add Criterion"));
+      butAddCriterion.set(
+        {
+          width : 100
+        });
       
       // When the button is hit, create a new refinement line
-      addcriteriabtn.addListener(
+      butAddCriterion.addListener(
         "execute",
         function() 
         {
@@ -270,24 +477,18 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
 
         }, 
         this);
-      
-      // Add buttons onto button bar, with a little space
-      buttonbar.add(resetbtn);
-      buttonbar.add(new qx.ui.core.Spacer(5));
-      buttonbar.add(searchbtn);
-      buttonbar.add(new qx.ui.core.Spacer(5));
-      buttonbar.add(addcriteriabtn);
+      buttonbar.add(butAddCriterion);
       
       // Add the Scroll-wrapped criteria on top of the buttonbar
-      vbox.add(criteriascroll, { flex : 1 });
+      vBox.add(criteriascroll, { flex : 1 });
 
       // Add some space before the button bar
-      vbox.add(new qx.ui.core.Spacer(10, 10));
+      vBox.add(new qx.ui.core.Spacer(10, 10));
 
       // Add the button bar
-      vbox.add(buttonbar);
+      vBox.add(buttonbar);
 
-      container.add(vbox);
+      container.add(vBox);
     },
 
 /*
@@ -481,29 +682,41 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
       var       criteriaObject;
       
       // This HBox will contain an entire line of refinement
-      lineHBox = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+      lineHBox = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
       
       // Create the Attribute Select Box
       attrSelect = new qx.ui.form.SelectBox();
       
       // Store some attributes in it, using the model for a switch in the FSM
-      attrSelect.add(new qx.ui.form.ListItem("All Text Fields", null,
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("All Text Fields"),
+                                             null,
                                              "alltext"));      
-      attrSelect.add(new qx.ui.form.ListItem("Tag", null, "tags"));
-      attrSelect.add(new qx.ui.form.ListItem("Title", null, "title"));
-      attrSelect.add(new qx.ui.form.ListItem("Description", null,
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("Category or Tag"),
+                                             null,
+                                             "tags"));
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("Title"),
+                                             null,
+                                             "title"));
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("Description"),
+                                             null,
                                              "description"));
-      attrSelect.add(new qx.ui.form.ListItem("Likes >", null,
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("Likes >"),
+                                             null,
                                              "likesGT"));
-      attrSelect.add(new qx.ui.form.ListItem("Likes <", null,
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("Likes <"),
+                                             null,
                                              "likesLT"));
-      attrSelect.add(new qx.ui.form.ListItem("Likes =", null,
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("Likes ="),
+                                             null,
                                              "likesEQ"));
-      attrSelect.add(new qx.ui.form.ListItem("Downloads >", null,
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("Downloads >"),
+                                             null,
                                              "downloadsGT"));
-      attrSelect.add(new qx.ui.form.ListItem("Downloads <", null,
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("Downloads <"),
+                                             null,
                                              "downloadsLT"));
-      attrSelect.add(new qx.ui.form.ListItem("Downloads =", null,
+      attrSelect.add(new qx.ui.form.ListItem(this.tr("Downloads ="),
+                                             null,
                                              "downloadsEQ"));
       
       //attrSelect.add(new qx.ui.form.ListItem("Date Created", null,
@@ -582,11 +795,8 @@ qx.Class.define("aiagallery.module.dgallery.findapps.Gui",
       
       // Add boxes in the correct order, with a little space separating them.
       lineHBox.add(attrSelect);
-      lineHBox.add(new qx.ui.core.Spacer(5));
 //      lineHBox.add(qualSelect);
-//      lineHBox.add(new qx.ui.core.Spacer(5));
-      lineHBox.add(valueField);
-      lineHBox.add(new qx.ui.core.Spacer(10));
+      lineHBox.add(valueField, { flex : 1 });
       lineHBox.add(deletebtn);
       
       // Create an object to easily access all of the selections
