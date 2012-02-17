@@ -215,7 +215,7 @@ new aiagallery.main.Module(
   aiagallery.module.dgallery.myapps.MyApps,
   null,
   false,
-  aiagallery.main.Constant.PAGE_NAME_CONSTANTS[3]);
+  aiagallery.main.Constant.PAGE_NAME_CONSTANTS[2]);
 
 
 

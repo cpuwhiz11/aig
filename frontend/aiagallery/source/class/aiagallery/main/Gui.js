@@ -51,7 +51,8 @@ qx.Class.define("aiagallery.main.Gui",
       var             lookingAt;
       var             displayedHierarchy;
       var             _this = this;
-      var             queryString; 
+      var             queryString;
+      var             thisModule; 	  
 
       // Retrieve the previously-created top-level tab view
       var mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");
@@ -194,9 +195,6 @@ qx.Class.define("aiagallery.main.Gui",
         this.setUserData("pageSelectorBar", pageSelectorBar);
         hbox.add(pageSelectorBar);
         
-        // Add listener on change selection events
-        //pageSelectorBar.addListener("changeSelection", this.__onHistoryChanged());
-
         // Add the right-justified page selector bar to the application
         pagePane.add(hbox);
 
@@ -538,10 +536,7 @@ qx.Class.define("aiagallery.main.Gui",
               };
             loader.open("GET", "/_ah/channel/jsapi");
             loader.send();
-          });
-          
-        // Back button and bookmark support
-        //this.__initBookmarkSupport(moduleList);
+          });        
       }
       
       // Get the page hierarchy
@@ -596,13 +591,15 @@ qx.Class.define("aiagallery.main.Gui",
         // See how many modules there are associated with this menu item
         numModules = 0;
 
-        //add that modules queryString to the page 
-        var queryString = moduleList[menuItem][menuItem].queryString;   
-        //queryString = queryString.queryString;         
-        this.setUserData("queryString", queryString);    
-
         for (moduleName in moduleList[menuItem])
         {
+		
+		  // add that modules queryString to the page 
+		  if (numModules === 0) {
+		    thisModule = moduleList[menuItem][moduleName];
+		    page.setUserData("queryString", thisModule.queryString);
+		  } 
+		
           // We found a module.  Increment our counter
           numModules++;
 
@@ -710,6 +707,10 @@ qx.Class.define("aiagallery.main.Gui",
 
         }
       }
+	  
+	  // Add listener on change selection events
+      page.addListener("changeSelection", this.__onHistoryChanged());
+	  
       //Setup Bookmark support
       this.__initBookmarkSupport(moduleList);
     },
@@ -935,6 +936,16 @@ qx.Class.define("aiagallery.main.Gui",
      */
     __initBookmarkSupport : function(moduleList)
     {
+	
+	  var          queryString;
+	  var          thisModule;
+	  var          mainTabs 
+	                 = qx.core.Init.getApplication().getUserData("mainTabs");  
+	  var          tabArray;
+	  
+	  // get the children
+      tabArray = mainTabs.getChildren();
+	  
       this.__history = qx.bom.History.getInstance();
       this.__history.addListener("request", this.__onHistoryChanged, this);
 
@@ -949,27 +960,27 @@ qx.Class.define("aiagallery.main.Gui",
       
       // Handle bookmarks
       var state = this.__history.getState();
+	  
+	  // This is the language independent name of the page
       var name = state.replace(/_/g, " ");
-
-      // Get query String of called module
-      //queryString = moduleList[0][0].queryString;
 
       // checks if the state corresponds to a main tab. If yes, the application
       // will be initialized with the selected main tab
       var isState = false;
-
-      for (var i in moduleList[menuItem])
-      {
-        var label = moduleList[menuItem].queryString; 
-        if (moduleList[i].queryString == name) 
+      for (var i in tabArray)
+      {	  
+		queryString = tabArray[i].getUserData("queryString");
+        if (queryString == name) 
         {
-          isState = true;      
+		  // Found it so break 
+          isState = true;     
+          break;		  
         }
       }
 
       if (isState)
       {
-        this.__selectModule(moduleList[i].queryString);
+        this.__selectModule(queryString);
         return;
         
       // if no state is given or the state is not found default to home page
@@ -984,9 +995,10 @@ qx.Class.define("aiagallery.main.Gui",
      * Handler for changes of the history.
      * @param e {qx.event.type.Data} Data event containing the history changes.
      */
-    __onHistoryChanged : function(e)
+    __onHistoryChanged : function()
     {
-      var state = e.getData();
+	
+	  var queryString; 
 
       // Get the page selector bar
       var pageSelectorBar =
@@ -994,11 +1006,16 @@ qx.Class.define("aiagallery.main.Gui",
 
       // Get children
       var pageArray = pageSelectorBar.getChildren();
+	  
+	  // Get the currently selected page
+	  
+	  // Get its query string
       
       // If its an App Page
       //if (){
       //}
-    
+	  
+	  // Add the queryString constant for that page to the url 
       // Change URL to add language independent constant to it
       // queryString will be the string constant of the page the user is on
       qx.bom.History.getInstance().addToHistory(queryString);
@@ -1060,6 +1077,7 @@ qx.Class.define("aiagallery.main.Gui",
     {
       var mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");  
       var tabArray;
+	  var pageArray;
 
       // get the children
       tabArray = mainTabs.getChildren();
@@ -1067,7 +1085,7 @@ qx.Class.define("aiagallery.main.Gui",
       // Iterate through their labels to find the tab
       for (var i in tabArray)
       {
-        if(tabArray[i].getLabel() == moduleName)
+        if(tabArray[i].getUserData("queryString") == moduleName)
         {
           // Select Module
           mainTabs.setSelection([tabArray[i]]);  
@@ -1077,7 +1095,7 @@ qx.Class.define("aiagallery.main.Gui",
             aiagallery.main.Gui.getInstance().getUserData("hierarchy");
           
           // Reinitialize the hierarchy to show only this page
-          hierarchy.setHierarchy([tabArray[i].getLabel()]);
+          hierarchy.setHierarchy([tabArray[i].getUserData("queryString")]);
 
           // Get the page selector bar
           var pageSelectorBar =
@@ -1099,10 +1117,9 @@ qx.Class.define("aiagallery.main.Gui",
         }
       }
       
-      // TODO Never found page
+      // FIXME Never found page
       
       return; 
-      
     }
   }
 });
