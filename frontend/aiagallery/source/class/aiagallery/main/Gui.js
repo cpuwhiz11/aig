@@ -51,6 +51,7 @@ qx.Class.define("aiagallery.main.Gui",
       var             lookingAt;
       var             displayedHierarchy;
       var             _this = this;
+      var             queryString; 
 
       // Retrieve the previously-created top-level tab view
       var mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");
@@ -192,6 +193,9 @@ qx.Class.define("aiagallery.main.Gui",
         pageSelectorBar.setLayout(new qx.ui.layout.HBox(10));
         this.setUserData("pageSelectorBar", pageSelectorBar);
         hbox.add(pageSelectorBar);
+        
+        // Add listener on change selection events
+        pageSelectorBar.addListener("changeSelection", __onHistoryChanged());
 
         // Add the right-justified page selector bar to the application
         pagePane.add(hbox);
@@ -688,9 +692,6 @@ qx.Class.define("aiagallery.main.Gui",
           canvas.addListener("appear", fsm.eventListener, fsm);
           canvas.addListener("disappear", fsm.eventListener, fsm);
           
-          // Save Query String
-          //moduleList[menuItem].queryString; 
-
           // See if there are any functions to be called
           var thisFunctionList = functionList[menuItem];
           if (thisFunctionList)
@@ -703,6 +704,8 @@ qx.Class.define("aiagallery.main.Gui",
 
         }
       }
+      //Setup Bookmark support
+      this.__initBookmarkSupport(moduleList);
     },
 
     /**
@@ -783,7 +786,7 @@ qx.Class.define("aiagallery.main.Gui",
             fsm.setDebugFlags(0);
           }
         }
-      }
+      }      
     },
     
     _editProfile : function()
@@ -929,6 +932,15 @@ qx.Class.define("aiagallery.main.Gui",
       this.__history = qx.bom.History.getInstance();
       this.__history.addListener("request", this.__onHistoryChanged, this);
 
+      // Add listener for back button
+      qx.bom.History.getInstance().addListener("request", function(e)
+      {
+        var state = e.getData();
+
+        // application specific state update (= application code)
+        this.setApplicationState(state);
+      }, this);
+      
       // Handle bookmarks
       var state = this.__history.getState();
       var name = state.replace(/_/g, " ");
@@ -939,8 +951,8 @@ qx.Class.define("aiagallery.main.Gui",
 
       for (var i in moduleList)
       {
-        var label = moduleList[i].getlabel(); 
-        if (moduleList[i] == state) 
+        var label = moduleList[i].queryString; 
+        if (moduleList[i].queryString == name) 
         {
           isState = true;      
         }
@@ -948,12 +960,12 @@ qx.Class.define("aiagallery.main.Gui",
 
       if (isState)
       {
-        this.__selectModule(moduleName);
+        this.__selectModule(moduleList[i].queryString);
         return;
         
       // if no state is given or the state is not found default to home page
       } else {
-        this.__selectModule("Home"); 
+        this.__selectModule(aiagallery.main.Constant.PAGE_NAME_CONSTANTS[0]); 
         return;
       }
     },
@@ -967,23 +979,21 @@ qx.Class.define("aiagallery.main.Gui",
     {
       var state = e.getData();
 
-      // is a sample name given
-      if (this.__samples.isAvailable(state))
-      {
-        var sample = this.__samples.get(state);
-        if (this.__isCodeNotEqual(sample.getCode(), this.__editor.getCode())) {
-          this.setCurrentSample(sample);
-        }
+      // Get the page selector bar
+      var pageSelectorBar =
+        aiagallery.main.Gui.getInstance().getUserData("pageSelectorBar");
 
-      // is code given
-      } else if (state != "") {
-        var code = this.__parseURLCode(state);
-        if (code != this.__editor.getCode()) {
-          this.__editor.setCode(code);
-          this.setName(this.tr("Custom Code"));
-          this.run();
-        }
+      // Get children
+      var pageArray = pageSelectorBar.getChildren();
+      
+      // If its an App Page
+      if (){
       }
+    
+      // Change URL to add language independent constant to it
+      // queryString will be the string constant of the page the user is on
+      qx.bom.History.getInstance().addToHistory(queryString);
+      
     },
 
 
