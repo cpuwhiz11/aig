@@ -195,7 +195,7 @@ qx.Class.define("aiagallery.main.Gui",
         hbox.add(pageSelectorBar);
         
         // Add listener on change selection events
-        pageSelectorBar.addListener("changeSelection", __onHistoryChanged());
+        //pageSelectorBar.addListener("changeSelection", this.__onHistoryChanged());
 
         // Add the right-justified page selector bar to the application
         pagePane.add(hbox);
@@ -596,10 +596,16 @@ qx.Class.define("aiagallery.main.Gui",
         // See how many modules there are associated with this menu item
         numModules = 0;
 
+        //add that modules queryString to the page 
+        var queryString = moduleList[menuItem][menuItem].queryString;   
+        //queryString = queryString.queryString;         
+        this.setUserData("queryString", queryString);    
+
         for (moduleName in moduleList[menuItem])
         {
           // We found a module.  Increment our counter
           numModules++;
+
         }
 
         var DebugFlags = qx.util.fsm.FiniteStateMachine.DebugFlags;
@@ -945,13 +951,16 @@ qx.Class.define("aiagallery.main.Gui",
       var state = this.__history.getState();
       var name = state.replace(/_/g, " ");
 
+      // Get query String of called module
+      //queryString = moduleList[0][0].queryString;
+
       // checks if the state corresponds to a main tab. If yes, the application
       // will be initialized with the selected main tab
       var isState = false;
 
-      for (var i in moduleList)
+      for (var i in moduleList[menuItem])
       {
-        var label = moduleList[i].queryString; 
+        var label = moduleList[menuItem].queryString; 
         if (moduleList[i].queryString == name) 
         {
           isState = true;      
@@ -987,8 +996,8 @@ qx.Class.define("aiagallery.main.Gui",
       var pageArray = pageSelectorBar.getChildren();
       
       // If its an App Page
-      if (){
-      }
+      //if (){
+      //}
     
       // Change URL to add language independent constant to it
       // queryString will be the string constant of the page the user is on
