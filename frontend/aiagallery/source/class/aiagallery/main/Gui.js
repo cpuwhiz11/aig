@@ -1019,7 +1019,7 @@ qx.Class.define("aiagallery.main.Gui",
         var state = e.getData();
 
         // application specific state update (= application code)
-        this.setApplicationState(state);
+        this.__selectModule(state);
       }, this);
       
       // Handle bookmarks
@@ -1066,13 +1066,6 @@ qx.Class.define("aiagallery.main.Gui",
 	  var mainTabs; 
 	  var selectedPage;
 
-      // Get the page selector bar
-      //var pageSelectorBar =
-        //aiagallery.main.Gui.getInstance().getUserData("pageSelectorBar");
-
-      // Get children
-      //var pageArray = pageSelectorBar.getChildren();
-	  
 	  //Get the main tab view
       mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");
 	  
