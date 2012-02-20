@@ -200,9 +200,12 @@ qx.Class.define("aiagallery.main.Gui",
 
         mainTabs = new qx.ui.tabview.TabView();
         mainTabs.setAppearance("radioview");
+		
+		// Add listener on change selection events
+        mainTabs.addListener("changeSelection", this.__onHistoryChanged);
         
         // We're going to control the tab view via the link bar
-        mainTabs.getChildControl("bar").exclude();
+        //mainTabs.getChildControl("bar").exclude();
         
         pagePane.add(mainTabs, { flex : 1 });
 
@@ -550,7 +553,7 @@ qx.Class.define("aiagallery.main.Gui",
           new qx.ui.tabview.Page(menuItem, iconList[menuItem]);
         page.setLayout(new qx.ui.layout.VBox(4));
         mainTabs.add(page);
-        
+		
         // If this is an ephemeral page...
         if (menuItem.charAt(0) == "-")
         {
@@ -707,9 +710,6 @@ qx.Class.define("aiagallery.main.Gui",
 
         }
       }
-	  
-	  // Add listener on change selection events
-      page.addListener("changeSelection", this.__onHistoryChanged());
 	  
       //Setup Bookmark support
       this.__initBookmarkSupport(moduleList);
