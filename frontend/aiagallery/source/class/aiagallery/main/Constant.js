@@ -29,7 +29,7 @@ qx.Class.define("aiagallery.main.Constant",
       "application/octet-stream"
     ],
     
-    PAGE_NAME_CONSTANTS : ["Home", "Find Apps", "My Apps", 
+    PAGE_NAME_CONSTANTS : ["Home", "Find_Apps", "My_Apps", 
                            "Testing", "Management", "AppPage"]
   }
 });

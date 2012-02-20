@@ -53,7 +53,8 @@ qx.Class.define("aiagallery.main.Gui",
       var             displayedHierarchy;
       var             _this = this;
       var             queryString;
-      var             thisModule; 	  
+      var             thisModule; 
+      var             bookmarkFlag = false; 	  
 
       // Retrieve the previously-created top-level tab view
       var mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");
@@ -640,6 +641,9 @@ qx.Class.define("aiagallery.main.Gui",
         
         // Add the hbox to the application
         application.add(hbox);
+		
+        // Set the bookmark flag to true
+		bookmarkFlag = true; 
       }
       
       // Get the page hierarchy
@@ -811,8 +815,9 @@ qx.Class.define("aiagallery.main.Gui",
         }
       }
 	  
-      //Setup Bookmark support
-      this.__initBookmarkSupport(moduleList);
+	  if (bookmarkFlag)
+	  	// Setup Bookmark support
+        this.__initBookmarkSupport(moduleList);
     },
 
     /**
@@ -1030,7 +1035,8 @@ qx.Class.define("aiagallery.main.Gui",
       this._win.center();
       this._win.show();
     },
-         /**
+    
+	/**
      * Back button and bookmark support
      * Include moduleList to check against it
      */
@@ -1047,10 +1053,9 @@ qx.Class.define("aiagallery.main.Gui",
       tabArray = mainTabs.getChildren();
 	  
       this.__history = qx.bom.History.getInstance();
-      this.__history.addListener("request", this.__onHistoryChanged, this);
-
+	  
       // Add listener for back button
-      qx.bom.History.getInstance().addListener("request", function(e)
+      this.__history.addListener("request", function(e)
       {
         var state = e.getData();
 
@@ -1121,55 +1126,7 @@ qx.Class.define("aiagallery.main.Gui",
       qx.bom.History.getInstance().addToHistory(queryString);
       
     },
-
-
-    /**
-     * Helper method for parsing the given url parameter to a valid code
-     * fragment.
-     * @param state {String} The given state of the browsers history.
-     * @return {String} A valid code snippet.
-     */
-    __parseURLCode : function(state)
-    {
-      try {
-        var data = qx.lang.Json.parse(state);
-        // change the mode in case a different mode is given
-        if (data.mode && data.mode != this.__mode) {
-          this.setMode(data.mode);
-        }
-        return decodeURIComponent(data.code).replace(/%0D/g, "");
-      } catch (e) {
-        var error = this.tr("// Could not handle URL parameter! \n// %1", e);
-
-        if (qx.core.Environment.get("engine.name") == "mshtml") {
-          error += this.tr("// Your browser has a length restriction of the " +
-                          "URL parameter which could have caused the problem.");
-        }
-        return error;
-      }
-    },
-
-
-    /**
-     * Adds the given code to the history.
-     * @param code {String} the code to add.
-     * @lint ignoreDeprecated(confirm)
-     */
-    __addCodeToHistory : function(code) {
-      var codeJson =
-        '{"code":' + '"' + encodeURIComponent(code) + '", "mode":"' + this.__mode + '"}';
-      if (qx.core.Environment.get("engine.name") == "mshtml" && codeJson.length > 1300) {
-        if (!this.__ignoreSaveFaults && confirm(
-          this.tr("Cannot append sample code to URL, as it is too long. " +
-                  "Disable this warning in the future?"))
-        ) {
-          this.__ignoreSaveFaults = true;
-        };
-        return;
-      }
-      this.__history.addToHistory(codeJson);
-    },
-    
+ 
     /**
     * Select, in the main view, the module contained in the String moduleName
     */
@@ -1210,6 +1167,11 @@ qx.Class.define("aiagallery.main.Gui",
             {
               // Select the page
               pageSelectorBar.setSelection([pageArray[i]]);
+			  
+			  // Add the queryString constant for that page to the url 
+              // Change URL to add language independent constant to it
+              // queryString will be the string constant of the page the user is on
+              qx.bom.History.getInstance().addToHistory(moduleName);
             }
           }
      
