@@ -31,6 +31,7 @@ qx.Class.define("aiagallery.main.Gui",
     {
       var             i;
       var             o;
+      var             font;
       var             hbox;
       var             label;
       var             header;
@@ -73,7 +74,7 @@ qx.Class.define("aiagallery.main.Gui",
           {
             spacing       : 10
           });
-        var application = new qx.ui.container.Composite(o);
+        application = new qx.ui.container.Composite(o);
         this.getApplicationRoot().add(application, { edge : 0 });
 
         // Create a horizontal box layout for the title
@@ -105,8 +106,13 @@ qx.Class.define("aiagallery.main.Gui",
           "Community Gallery" +
           "</center>" +
           "</div>");
-        o.setRich(true);
-        o.setFont(new qx.bom.Font(22, [ "sans-serif" ]));
+        font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
+        font.setSize(22);
+        o.set(
+          {
+            rich : true,
+            font : font
+          });
         header.add(o);
 
         // Add a flexible spacer to take up the whole middle
@@ -485,6 +491,9 @@ qx.Class.define("aiagallery.main.Gui",
                       // Open a channel for server push
                       channel = new goog.appengine.Channel(e);
                       socket = channel.open();
+
+                      // Save the channel socket
+                      application.setUserData("channelSocket", socket);
                       
                       // When we receive a message on the channel, post a
                       // message on the message bus.
@@ -512,19 +521,43 @@ qx.Class.define("aiagallery.main.Gui",
                       socket.onerror = function(data)
                       {
                         channelMessage("error", data);
+
+                        // There's no longer a channel socket
+                        application.setUserData("channelSocket", null);
+                        socket = null;
+                        
+                        // Re-establish the channel
+                        qx.util.TimerManager.getInstance().start(
+                          function()
+                          {
+                            createChannel();
+                          },
+                          0,
+                          _this,
+                          null,
+                          5000);
                       };
 
                       // Display a message when the channel is closed
                       socket.onclose = function(data)
                       {
                         channelMessage("close", data);
+
+                        // There's no longer a channel socket
+                        application.setUserData("channelSocket", null);
+                        socket = null;
                         
                         // Re-establish the channel
-                        createChannel();
+                        qx.util.TimerManager.getInstance().start(
+                          function()
+                          {
+                            createChannel();
+                          },
+                          0,
+                          _this,
+                          null,
+                          5000);
                       };
-
-                      // Save the channel token (if provided)
-                      application.setUserData("channelSocket", socket);
                     },
                     "getChannelToken",
                     []);
@@ -539,7 +572,41 @@ qx.Class.define("aiagallery.main.Gui",
               };
             loader.open("GET", "/_ah/channel/jsapi");
             loader.send();
+<<<<<<< HEAD
           });        
+=======
+          });
+        
+        // Create the footer
+        hbox = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+        
+        // Add a spacer to center the Terms of Service link
+        hbox.add(new qx.ui.core.Spacer(10, 10), { flex : 1 });
+        
+        // Add a link to the terms of service
+        font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
+        font.setDecoration("underline");
+        o = new qx.ui.basic.Label("Terms of Service");
+        o.set(
+          {
+            font   : font,
+            height : 20
+          });
+        o.addListener(
+          "click",
+          function(e)
+          {
+            window.open("http://www.google.com/intl/en/policies/terms/",
+                        "Terms of Service");
+          });
+        hbox.add(o);
+        
+        // Add a spacer to center the Terms of Service link
+        hbox.add(new qx.ui.core.Spacer(10, 10), { flex : 1 });
+        
+        // Add the hbox to the application
+        application.add(hbox);
+>>>>>>> d0e126ccced2b8032f4d36d3b49a81880b9f1af7
       }
       
       // Get the page hierarchy

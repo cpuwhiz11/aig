@@ -26,6 +26,8 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
     {
       var             o;
       var             text;
+      var             font;
+      var             hbox;
       var             fsm = module.fsm;
       var             outerCanvas = module.canvas;
       
@@ -39,6 +41,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       canvas.setPadding(20);
       scrollContainer.add(canvas, { flex : 1 });
       
+/*
       // Create the top row (welcome and general info about AIA/Gallery)
       var welcomeLayout = new qx.ui.layout.HBox();
       welcomeLayout.setSpacing(20);
@@ -67,26 +70,11 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
 	  "<p>Get started by clicking on <b>Find Apps</b>, and go ahead ",
 	  "and add your own projects by clicking on <b>My Apps</b>.",
 
-	  "<p>Also, you can browse and download projects directly to your ",
+	  "<p>Also, you can browse projects from your ",
 	  "Android phone by using our companion ",
 	  '<a href="http://www.appinventor.org/mobile-gallery" target="new">',
           "Mobile Community Gallery</a> ",
-	  "app!",
-
-
-	  "<p>&nbsp;</p>",
-
-	  "<p><em>App Inventor Community Gallery is a resource provided ",
-	  "to the App Inventor community.  We are supported by a ",
-	  "grant from Google Inc.  Our site is presently in a beta launch. ",
-	  'Please be nice!  Please see more info ',
-	  '<a href="http://www.cs.uml.edu/ecg/index.php/Projects/AICG" ',
-	  'target="new">',
-	  'here',
-	  '</a> and email us at ',
-	  '<a href="mailto:aigallery@weblab.cs.uml.edu">',
-	  'aigallery@weblab.cs.uml.edu</a> if you ',
-	  "have any questions or comments.  Thanks.</em>"
+	  "app!"
         ].join("");
       message.set(
         {
@@ -141,9 +129,18 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
 
       // Add the link row to the page
       canvas.add(linkRow);
+*/
       
+      // Create a large bold font
+      font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
+      font.setSize(26);
+
       // Featured Apps section
       var featuredAppsLayout = new qx.ui.layout.VBox();
+      featuredAppsLayout.set(
+        {
+          alignX : "center"
+        });
       this.featuredAppsContainer = 
         new qx.ui.container.Composite(featuredAppsLayout);
 
@@ -151,23 +148,32 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       var featuredAppsHeader = new qx.ui.basic.Label();
       featuredAppsHeader.set(
         {
-          value      : "<h3>Featured Apps</h3>",
-          rich       : true
+          value : "Featured Apps",
+          font  : font
         });
       this.featuredAppsContainer.add(featuredAppsHeader);
       
+      // Create an hbox to center the Featured Apps slidebar
+      hbox = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+      
+      // Add a left-side spacer
+      hbox.add(new qx.ui.core.Spacer(10, 10), { flex : 1 });
+
       // slide bar of Featured Apps
       var featuredAppsSlideBar = new qx.ui.container.SlideBar();
-      featuredAppsSlideBar.set(
-        {
-          height : 180
-        });
-      
       fsm.addObject("Featured Apps", featuredAppsSlideBar);
       this.featuredAppsContainer.add(featuredAppsSlideBar);
-      
+      hbox.add(this.featuredAppsContainer);
+
+      // Add a right-side spacer
+      hbox.add(new qx.ui.core.Spacer(10, 10), { flex : 1 });
+
       // add Featured Apps section to the page
-      canvas.add(this.featuredAppsContainer);
+      canvas.add(hbox);
+
+      // Reduce font size a little bit for the other two ribbons
+      font = font.clone();
+      font.setSize(22);
 
       // Newest Apps section
       var newestAppsLayout = new qx.ui.layout.VBox();
@@ -177,17 +183,13 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       var newestAppsHeader = new qx.ui.basic.Label();
       newestAppsHeader.set(
         {
-          value      : "<h3>Newest Apps</h3>",
-          rich       : true
+          value : "Newest Apps",
+          font  : font
         });
       newestApps.add(newestAppsHeader);
       
       // slide bar of Newest Apps
       var newestAppsSlideBar = new qx.ui.container.SlideBar();
-      newestAppsSlideBar.set(
-        {
-          height : 180
-        });
       
       fsm.addObject("Newest Apps", newestAppsSlideBar);
       newestApps.add(newestAppsSlideBar);
@@ -203,17 +205,13 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       var likedAppsHeader = new qx.ui.basic.Label();
       likedAppsHeader.set(
         {
-          value      : "<h3>Most Liked Apps</h3>",
-          rich       : true
+          value : "Most Liked Apps",
+          font  : font
         });
       likedApps.add(likedAppsHeader);
       
       // slide bar of liked Apps
       var likedAppsSlideBar = new qx.ui.container.SlideBar();
-      likedAppsSlideBar.set(
-        {
-          height : 180
-        });
       
       fsm.addObject("Most Liked Apps", likedAppsSlideBar);
       likedApps.add(likedAppsSlideBar);
@@ -261,35 +259,32 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         var newestAppsList = response.data.result.Newest;
         var likedAppsList = response.data.result.MostLiked;
 
-        // FIXME: KLUDGE: should be able to update without remove/add!!!
         var parent = featuredApps.getLayoutParent();
         parent.remove(featuredApps);
         featuredApps = new qx.ui.container.SlideBar();
         featuredApps.set(
           {
-            height : 180
+            height : 410
           });
         fsm.addObject("Featured Apps", featuredApps);
         parent.add(featuredApps);
 
-        // FIXME: KLUDGE: should be able to update without remove/add!!!
         parent = newestApps.getLayoutParent();
         parent.remove(newestApps);
         newestApps = new qx.ui.container.SlideBar();
         newestApps.set(
           {
-            height : 180
+            height : 210
           });
         fsm.addObject("Newest Apps", newestApps);
         parent.add(newestApps);
 
-        // FIXME: KLUDGE: should be able to update without remove/add!!!
         parent = likedApps.getLayoutParent();
         parent.remove(likedApps);
         likedApps = new qx.ui.container.SlideBar();
         likedApps.set(
           {
-            height : 180
+            height : 210
           });
         fsm.addObject("Most Liked Apps", likedApps);
         parent.add(likedApps);
@@ -299,10 +294,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         {
           var appFeatured = featuredAppsList[i];
           var appThumbFeatured = 
-            new aiagallery.widget.AppThumb(appFeatured.title,
-                                           appFeatured.displayName,
-                                           appFeatured.image1,
-                                           appFeatured.owner);
+            new aiagallery.widget.SearchResult("featured", appFeatured);
           featuredApps.add(appThumbFeatured);
           
           // Associate the app data with the UI widget so it can be passed
@@ -330,10 +322,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         {
           var appNewest = newestAppsList[i];
           var appThumbNewest = 
-            new aiagallery.widget.AppThumb(appNewest.title, 
-                                           appNewest.displayName,
-                                           appNewest.image1,
-                                           appNewest.owner);
+            new aiagallery.widget.SearchResult("homeRibbon", appNewest);
           newestApps.add(appThumbNewest);
 
           // Associate the app data with the UI widget so it can be passed
@@ -358,10 +347,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
           var appLiked = likedAppsList[i];
 
           var appThumbLiked = 
-            new aiagallery.widget.AppThumb(appLiked.title,
-                                           appLiked.displayName,
-                                           appLiked.image1,
-                                           appLiked.owner);
+            new aiagallery.widget.SearchResult("homeRibbon", appLiked);
           likedApps.add(appThumbLiked);
 
           // Associate the app data with the UI widget so it can be passed
