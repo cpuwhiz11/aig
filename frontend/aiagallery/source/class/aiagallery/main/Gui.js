@@ -572,9 +572,7 @@ qx.Class.define("aiagallery.main.Gui",
               };
             loader.open("GET", "/_ah/channel/jsapi");
             loader.send();
-<<<<<<< HEAD
-          });        
-=======
+			
           });
         
         // Create the footer
@@ -606,7 +604,6 @@ qx.Class.define("aiagallery.main.Gui",
         
         // Add the hbox to the application
         application.add(hbox);
->>>>>>> d0e126ccced2b8032f4d36d3b49a81880b9f1af7
       }
       
       // Get the page hierarchy
@@ -1066,18 +1063,25 @@ qx.Class.define("aiagallery.main.Gui",
     {
 	
 	  var queryString; 
+	  var mainTabs; 
+	  var selectedPage;
 
       // Get the page selector bar
-      var pageSelectorBar =
-        aiagallery.main.Gui.getInstance().getUserData("pageSelectorBar");
+      //var pageSelectorBar =
+        //aiagallery.main.Gui.getInstance().getUserData("pageSelectorBar");
 
       // Get children
-      var pageArray = pageSelectorBar.getChildren();
+      //var pageArray = pageSelectorBar.getChildren();
+	  
+	  //Get the main tab view
+      mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");
 	  
 	  // Get the currently selected page
+	  selectedPage = mainTabs.getSelection();
 	  
 	  // Get its query string
-      
+      queryString = selectedPage[0].getUserData("queryString");
+	  
       // If its an App Page
       //if (){
       //}
