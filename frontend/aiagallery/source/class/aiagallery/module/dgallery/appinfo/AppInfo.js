@@ -46,7 +46,9 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.AppInfo",
                   mainTabs.setSelection([ page ]);
                }
               ],
-              true);              // Instantiate a new module for each app
+              true,            // Instantiate a new module for each app
+			  aiagallery.main.Constant.PAGE_NAME_CONSTANTS[5],
+			  uid);              
 
       // Transmit the UID of this module */
       app.setUserData("app_uid", uid);

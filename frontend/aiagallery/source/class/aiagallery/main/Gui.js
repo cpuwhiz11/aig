@@ -212,7 +212,7 @@ qx.Class.define("aiagallery.main.Gui",
         mainTabs.addListener("changeSelection", this.__onHistoryChanged);
         
         // We're going to control the tab view via the link bar
-        //mainTabs.getChildControl("bar").exclude();
+        mainTabs.getChildControl("bar").exclude();
         
         pagePane.add(mainTabs, { flex : 1 });
 
@@ -705,6 +705,13 @@ qx.Class.define("aiagallery.main.Gui",
 		  if (numModules === 0) {
 		    thisModule = moduleList[menuItem][moduleName];
 		    page.setUserData("queryString", thisModule.queryString);
+			
+			// If its an app add  the appId as user data
+			if(thisModule.queryString == 
+			  aiagallery.main.Constant.PAGE_NAME_CONSTANTS[5])
+			{
+			  page.setUserData("app_uid", thisModule.uid); 
+			}
 		  } 
 		
           // We found a module.  Increment our counter
@@ -1058,16 +1065,14 @@ qx.Class.define("aiagallery.main.Gui",
       this.__history.addListener("request", function(e)
       {
         var state = e.getData();
-
-        // application specific state update (= application code)
         this.__selectModule(state);
       }, this);
-      
+	  
       // Handle bookmarks
       var state = this.__history.getState();
 	  
-	  // This is the language independent name of the page
-      var name = state.replace(/_/g, " ");
+	  // Is this an app page or find apps search
+      var query = state.search(); 
 
       // checks if the state corresponds to a main tab. If yes, the application
       // will be initialized with the selected main tab
@@ -1075,7 +1080,7 @@ qx.Class.define("aiagallery.main.Gui",
       for (var i in tabArray)
       {	  
 		queryString = tabArray[i].getUserData("queryString");
-        if (queryString == name) 
+        if (queryString == state) 
         {
 		  // Found it so break 
           isState = true;     
@@ -1116,9 +1121,27 @@ qx.Class.define("aiagallery.main.Gui",
 	  // Get its query string
       queryString = selectedPage[0].getUserData("queryString");
 	  
-      // If its an App Page
-      //if (){
-      //}
+	  // No page selected so this is the startup proccess ignore and return
+	  if (queryString == null) 
+	  {
+	    return;
+	  }
+	  
+      // If its an App Page we need to record the appid to switch to it
+      if (queryString == aiagallery.main.Constant.PAGE_NAME_CONSTANTS[5])
+	  {	  
+	    // Add appId to end of url
+		queryString += "?uid=" 
+		  + selectedPage[0].getUserData("app_uid");
+      }
+	  /*
+	  // If its the Find Apps page we need to record the search info
+	  if (queryString == aiagallery.main.Constant.PAGE_NAME_CONSTANTS[1])
+	  {
+	    // Add appId to end of url
+		queryString = queryString + "AppID:" ; 
+      }
+	  */
 	  
 	  // Add the queryString constant for that page to the url 
       // Change URL to add language independent constant to it
@@ -1160,18 +1183,34 @@ qx.Class.define("aiagallery.main.Gui",
 
           // Get children
           pageArray = pageSelectorBar.getChildren();
+		  
+		  //Its an app page, search for the page and load it
+		  if (moduleName ==
+    	    aiagallery.main.Constant.PAGE_NAME_CONSTANTS[5])
+	      {
+		    // Search for app
+			//this.__findApp(uid)
+			
+		    // Add to url
+	        qx.bom.History.getInstance().addToHistory(moduleName);
+			
+			return;
+		  }
           
+		  // Need to remove and add in "-"
+	      var originalModuleName = moduleName;
+		  moduleName = moduleName.replace(/_/g, " ");
           for (var j in pageArray)
           {
-            if (pageArray[i].getLabel() == moduleName)
+            if (pageArray[j].getLabel() == moduleName)
             {
               // Select the page
-              pageSelectorBar.setSelection([pageArray[i]]);
+              pageSelectorBar.setSelection([pageArray[j]]);
 			  
 			  // Add the queryString constant for that page to the url 
               // Change URL to add language independent constant to it
               // queryString will be the string constant of the page the user is on
-              qx.bom.History.getInstance().addToHistory(moduleName);
+              qx.bom.History.getInstance().addToHistory(originalModuleName);
             }
           }
      
@@ -1179,9 +1218,35 @@ qx.Class.define("aiagallery.main.Gui",
         }
       }
       
-      // FIXME Never found page
-      
+      // FIXME Never found page, is that possible? 
+	  // Set to home 
+      //qx.bom.History.getInstance().addToHistory("Home");
       return; 
+    },
+
+    __findAppPage : function()
+    {
+  
+      var             rpc;
+
+      rpc = new qx.io.remote.Rpc();
+      rpc.setProtocol("2.0");
+      rpc.set(
+      {
+        url         : aiagallery.main.Constant.SERVICES_URL,
+        timeout     : 30000,
+        crossDomain : false,
+        serviceName : "aiagallery.features"
+      });
+            
+      // Issue the request to get the app 
+      rpc.callAsync(
+      function(e)
+      {
+      });
+	
+	  return; 
     }
+	
   }
 });

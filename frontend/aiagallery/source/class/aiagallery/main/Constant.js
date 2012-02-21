@@ -30,6 +30,6 @@ qx.Class.define("aiagallery.main.Constant",
     ],
     
     PAGE_NAME_CONSTANTS : ["Home", "Find_Apps", "My_Apps", 
-                           "Testing", "Management", "AppPage"]
+                           "Testing", "Management", "App"]
   }
 });

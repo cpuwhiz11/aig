@@ -54,6 +54,9 @@
  *
  * @param queryString {String}
  *    A name for this module that is not specific to a language
+ *
+ * @param uid {String}
+ *    The string uid of an app provided we are creating an app module 
  */
 qx.Class.define("aiagallery.main.Module",
 {
@@ -65,7 +68,8 @@ qx.Class.define("aiagallery.main.Module",
                        clazz,
                        functionList,
                        bNewInstance,
-                       queryString)
+                       queryString,
+					   uid)
   {
     this.base(arguments);
 
@@ -98,7 +102,9 @@ qx.Class.define("aiagallery.main.Module",
     
     // Add the language indepent module name
     this.queryString = queryString; 
-    //aiagallery.main.Module._list[menuItem]["queryString"] = queryString;  
+    
+	// Add uid if an app 
+	this.uid = uid; 
     
     // Specify whether this is to be a new instantiation or a singleton
     this.bNewInstance = !!bNewInstance;
