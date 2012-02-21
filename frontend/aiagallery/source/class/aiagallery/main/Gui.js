@@ -1055,6 +1055,9 @@ qx.Class.define("aiagallery.main.Gui",
 	  var          mainTabs 
 	                 = qx.core.Init.getApplication().getUserData("mainTabs");  
 	  var          tabArray;
+	  var          uid = "false";
+	  var          serchString = "false";
+	  
 	  
 	  // get the children
       tabArray = mainTabs.getChildren();
@@ -1071,8 +1074,24 @@ qx.Class.define("aiagallery.main.Gui",
       // Handle bookmarks
       var state = this.__history.getState();
 	  
-	  // Is this an app page or find apps search
-      var query = state.search(); 
+	  // Is this an app page or find apps search?
+      var query = state.substring(state.indexOf('?') + 1);
+	  var parts = query.split("&"); 
+	  
+	  // If it is then there will be something in parts 
+	  if (parts.length != 1) {
+	    // Get either the uid or the find apps search string
+		var uid = parts[1].substring(parts[1].indexOf('=') + 1);
+	  }
+	  
+	  // Check if there is an uid
+	  if (uid != "false")
+	  {
+	    aiagallery.module.dgallery.appinfo.AppInfo.addAppView(uid, "FAKE"); 
+		
+		//FIXME hiearchy is not being updated correctly 
+	    return;
+	  }
 
       // checks if the state corresponds to a main tab. If yes, the application
       // will be initialized with the selected main tab
@@ -1131,7 +1150,7 @@ qx.Class.define("aiagallery.main.Gui",
       if (queryString == aiagallery.main.Constant.PAGE_NAME_CONSTANTS[5])
 	  {	  
 	    // Add appId to end of url
-		queryString += "?uid=" 
+		queryString += "?&uid=" 
 		  + selectedPage[0].getUserData("app_uid");
       }
 	  /*
@@ -1158,9 +1177,29 @@ qx.Class.define("aiagallery.main.Gui",
       var mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");  
       var tabArray;
 	  var pageArray;
+	  var uid = "false"; 
 
       // get the children
       tabArray = mainTabs.getChildren();
+	  
+	  // Is this an app page or find apps search?
+      var query = moduleName.substring(moduleName.indexOf('?') + 1);
+	  var parts = query.split("&"); 
+	  
+	  // If it is then there will be something in parts 
+	  if (parts.length != 1) {
+	    // Get either the uid or the find apps search string
+		var uid = parts[1].substring(parts[1].indexOf('=') + 1);
+	  }
+	  
+	  // Check if there is an uid
+	  if (uid != "false")
+	  {
+	    aiagallery.module.dgallery.appinfo.AppInfo.addAppView(uid, "FAKE"); 
+		
+		//FIXME hiearchy is not being updated correctly 
+	    return;
+	  }
       
       // Iterate through their labels to find the tab
       for (var i in tabArray)
@@ -1183,19 +1222,6 @@ qx.Class.define("aiagallery.main.Gui",
 
           // Get children
           pageArray = pageSelectorBar.getChildren();
-		  
-		  //Its an app page, search for the page and load it
-		  if (moduleName ==
-    	    aiagallery.main.Constant.PAGE_NAME_CONSTANTS[5])
-	      {
-		    // Search for app
-			//this.__findApp(uid)
-			
-		    // Add to url
-	        qx.bom.History.getInstance().addToHistory(moduleName);
-			
-			return;
-		  }
           
 		  // Need to remove and add in "-"
 	      var originalModuleName = moduleName;
@@ -1222,30 +1248,6 @@ qx.Class.define("aiagallery.main.Gui",
 	  // Set to home 
       //qx.bom.History.getInstance().addToHistory("Home");
       return; 
-    },
-
-    __findAppPage : function()
-    {
-  
-      var             rpc;
-
-      rpc = new qx.io.remote.Rpc();
-      rpc.setProtocol("2.0");
-      rpc.set(
-      {
-        url         : aiagallery.main.Constant.SERVICES_URL,
-        timeout     : 30000,
-        crossDomain : false,
-        serviceName : "aiagallery.features"
-      });
-            
-      // Issue the request to get the app 
-      rpc.callAsync(
-      function(e)
-      {
-      });
-	
-	  return; 
     }
 	
   }
