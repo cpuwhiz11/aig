@@ -1074,22 +1074,11 @@ qx.Class.define("aiagallery.main.Gui",
       // Handle bookmarks
       var state = this.__history.getState();
 	  
-	  // Is this an app page or find apps search?
-      var query = state.substring(state.indexOf('?') + 1);
-	  var parts = query.split("&"); 
+	  var query = state.substring(0, 3);
 	  
-	  // If it is then there will be something in parts 
-	  if (parts.length != 1) {
-	    // Get either the uid or the find apps search string
-		var uid = parts[1].substring(parts[1].indexOf('=') + 1);
-	  }
-	  
-	  // Check if there is an uid
-	  if (uid != "false")
+	  if (query == aiagallery.main.Constant.PAGE_NAME_CONSTANTS[5])
 	  {
-	    aiagallery.module.dgallery.appinfo.AppInfo.addAppView(uid, "FAKE"); 
-		
-		//FIXME hiearchy is not being updated correctly 
+	    this.__selectModule(state); 
 	    return;
 	  }
 
@@ -1153,14 +1142,22 @@ qx.Class.define("aiagallery.main.Gui",
 		queryString += "?&uid=" 
 		  + selectedPage[0].getUserData("app_uid");
       }
-	  /*
+	  
 	  // If its the Find Apps page we need to record the search info
 	  if (queryString == aiagallery.main.Constant.PAGE_NAME_CONSTANTS[1])
 	  {
-	    // Add appId to end of url
-		queryString = queryString + "AppID:" ; 
+	  
+	    if (selectedPage[0])
+		{
+		  // Text Search
+		  queryString += "?&text"; 
+		}
+	  
+	    // Advanced Search
+	    // Add serchstring to url
+		//queryString += "?&str1=" + "&str2="
       }
-	  */
+	  
 	  
 	  // Add the queryString constant for that page to the url 
       // Change URL to add language independent constant to it
@@ -1187,7 +1184,7 @@ qx.Class.define("aiagallery.main.Gui",
 	  var parts = query.split("&"); 
 	  
 	  // If it is then there will be something in parts 
-	  if (parts.length != 1) {
+	  if (query.substring(1,4) == "uid") {
 	    // Get either the uid or the find apps search string
 		var uid = parts[1].substring(parts[1].indexOf('=') + 1);
 	  }
@@ -1200,6 +1197,13 @@ qx.Class.define("aiagallery.main.Gui",
 		//FIXME hiearchy is not being updated correctly 
 	    return;
 	  }
+	  
+	  /*
+	  // Check for findApps search string
+	  if (query.subString(1,4) == "")
+	  {
+	  }
+	  */ 
       
       // Iterate through their labels to find the tab
       for (var i in tabArray)
