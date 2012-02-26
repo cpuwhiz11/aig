@@ -1123,6 +1123,7 @@ qx.Class.define("aiagallery.main.Gui",
 	  var queryString; 
 	  var mainTabs; 
 	  var selectedPage;
+	  var originalName; 
 
 	  //Get the main tab view
       mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");
@@ -1162,7 +1163,9 @@ qx.Class.define("aiagallery.main.Gui",
 		//queryString += "?&str1=" + "&str2="
       }
 	  
-	  // Attach page to the queryString 
+	  // Attach page to the queryString
+      // Keep original name for title
+      originalName = queryString; 
 	  queryString = "page=" + queryString;  
 	  
 	  
@@ -1170,7 +1173,7 @@ qx.Class.define("aiagallery.main.Gui",
       // Change URL to add language independent constant to it
       // queryString will be the string constant of the page the user is on.
 	  // Second arguement is the title for the page. 
-      qx.bom.History.getInstance().addToHistory(queryString, queryString);
+      qx.bom.History.getInstance().addToHistory(queryString, originalName);
       
     },
  
@@ -1251,7 +1254,8 @@ qx.Class.define("aiagallery.main.Gui",
 			  // Add the queryString constant for that page to the url 
               // Change URL to add language independent constant to it
               // queryString will be the string constant of the page the user is on			  			  
-              qx.bom.History.getInstance().addToHistory(originalModuleName);
+              qx.bom.History.getInstance()
+			    .addToHistory(originalModuleName, originalModuleName.substring(5));
             }
           }
      
