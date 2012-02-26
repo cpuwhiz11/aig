@@ -1074,7 +1074,11 @@ qx.Class.define("aiagallery.main.Gui",
       // Handle bookmarks
       var state = this.__history.getState();
 	  
-	  var query = state.substring(0, 3);
+	  // Get a substring to check if its an app page
+	  var query = state.substring(5, 8);
+	  
+	  // Remove "page=" from state
+	  state = state.substring(5); 
 	  
 	  if (query == aiagallery.main.Constant.PAGE_NAME_CONSTANTS[5])
 	  {
@@ -1139,7 +1143,7 @@ qx.Class.define("aiagallery.main.Gui",
       if (queryString == aiagallery.main.Constant.PAGE_NAME_CONSTANTS[5])
 	  {	  
 	    // Add appId to end of url
-		queryString += "?&uid=" 
+		queryString += "&uid=" 
 		  + selectedPage[0].getUserData("app_uid");
       }
 	  
@@ -1150,7 +1154,7 @@ qx.Class.define("aiagallery.main.Gui",
 	    if (selectedPage[0])
 		{
 		  // Text Search
-		  queryString += "?&text"; 
+		  queryString += "&text"; 
 		}
 	  
 	    // Advanced Search
@@ -1158,11 +1162,15 @@ qx.Class.define("aiagallery.main.Gui",
 		//queryString += "?&str1=" + "&str2="
       }
 	  
+	  // Attach page to the queryString 
+	  queryString = "page=" + queryString;  
+	  
 	  
 	  // Add the queryString constant for that page to the url 
       // Change URL to add language independent constant to it
-      // queryString will be the string constant of the page the user is on
-      qx.bom.History.getInstance().addToHistory(queryString);
+      // queryString will be the string constant of the page the user is on.
+	  // Second arguement is the title for the page. 
+      qx.bom.History.getInstance().addToHistory(queryString, queryString);
       
     },
  
@@ -1184,7 +1192,7 @@ qx.Class.define("aiagallery.main.Gui",
 	  var parts = query.split("&"); 
 	  
 	  // If it is then there will be something in parts 
-	  if (query.substring(1,4) == "uid") {
+	  if (query.substring(4,7) == "uid") {
 	    // Get either the uid or the find apps search string
 		var uid = parts[1].substring(parts[1].indexOf('=') + 1);
 	  }
@@ -1229,6 +1237,9 @@ qx.Class.define("aiagallery.main.Gui",
           
 		  // Need to remove and add in "-"
 	      var originalModuleName = moduleName;
+		  
+		  //add page= back into string
+		  originalModuleName = "page=" + originalModuleName;  
 		  moduleName = moduleName.replace(/_/g, " ");
           for (var j in pageArray)
           {
@@ -1239,7 +1250,7 @@ qx.Class.define("aiagallery.main.Gui",
 			  
 			  // Add the queryString constant for that page to the url 
               // Change URL to add language independent constant to it
-              // queryString will be the string constant of the page the user is on
+              // queryString will be the string constant of the page the user is on			  			  
               qx.bom.History.getInstance().addToHistory(originalModuleName);
             }
           }
