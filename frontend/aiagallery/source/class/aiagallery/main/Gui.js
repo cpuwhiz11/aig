@@ -1160,7 +1160,7 @@ qx.Class.define("aiagallery.main.Gui",
 	  
 	    // Advanced Search
 	    // Add serchstring to url
-		//queryString += "?&str1=" + "&str2="
+	    //queryString += "?&str1=" + "&str2="
       }
 	  
 	  // Attach page to the queryString
@@ -1184,8 +1184,8 @@ qx.Class.define("aiagallery.main.Gui",
     {
       var mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");  
       var tabArray;
-	  var pageArray;
-	  var uid = "false"; 
+      var pageArray;
+      var uid = "false"; 
 
       // get the children
       tabArray = mainTabs.getChildren();
@@ -1203,9 +1203,9 @@ qx.Class.define("aiagallery.main.Gui",
 	  // Check if there is an uid
 	  if (uid != "false")
 	  {
-	    aiagallery.module.dgallery.appinfo.AppInfo.addAppView(uid, "FAKE"); 
+	    aiagallery.module.dgallery.appinfo.AppInfo.addAppView(uid, ""); 
 		
-		//FIXME hiearchy is not being updated correctly 
+	    //FIXME hiearchy is not being updated correctly 
 	    return;
 	  }
 	  
@@ -1251,7 +1251,7 @@ qx.Class.define("aiagallery.main.Gui",
               // Select the page
               pageSelectorBar.setSelection([pageArray[j]]);
 			  
-			  // Add the queryString constant for that page to the url 
+	      // Add the queryString constant for that page to the url 
               // Change URL to add language independent constant to it
               // queryString will be the string constant of the page the user is on			  			  
               qx.bom.History.getInstance()
