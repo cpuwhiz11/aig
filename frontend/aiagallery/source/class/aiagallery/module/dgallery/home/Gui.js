@@ -169,7 +169,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
 
 	  "You can:",
 	  "<ul>",
-	  "<p><li>Browse and download App Inventor projects",
+	  "<p><li>Browse and download a wide variety of App Inventor projects",
 
 	  "<p><li>Contribute your App Inventor project to share it with others",
 
