@@ -147,7 +147,8 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Fsm",
                              creationTime : "creationTime",
                              uploadTime   : "uploadTime",
                              source       : "source",
-                             comments     : "comments"
+                             comments     : "comments",
+                             tags         : "tags"
                            }
                          ]);
 
