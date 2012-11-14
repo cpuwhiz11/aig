@@ -25,6 +25,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
     {
       var fsm = module.fsm;
       var state;
+      var leaveState;
       var trans;
 
       // ------------------------------------------------------------ //
@@ -87,7 +88,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
           "disappear" :
           {
             "main.canvas" : //"Transition_Idle_to_checkLeave"
-              "Transition_Idle_to_Idle_via_disappear"
+              "Transition_Idle_to_Idle_via_confirm_disappear"
           }
         }
       });
@@ -258,43 +259,28 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
 
       state.addTransition(trans);
 
-
       /*
-       * Transition: Idle to checkLeave
+       * Transition: Idle to Idle
        *
        * Cause: "disappear" on canvas
        *
-       * Action: Check if the user wants to leave this page
+       * Action:
+       *  Stop our timer
        */
 
       trans = new qx.util.fsm.Transition(
-        "Transition_Idle_to_checkLeave",
+        "Transition_Idle_to_Idle_via_confirm_disappear",
       {
-        "nextState" : "Transition_Idle_to_Idle_via_disappear",
+        "nextState" : "State_Leave",
 
         "context" : this,
 
         "ontransition" : function(fsm, event)
         {
-          // If the user leaves the page with unsaved changes 
-          // pop a warning message
-          var val = 
-            dialog.Dialog.confirm("You have unsaved changes. Leave Page?",
-            function(result)
-              {
-                //dialog.Dialog.alert("Your answer was: " + result );
-                return result; 
-              }
-            ); 
-
-          // If user hit yes, return true, else null to not 
-          // take transition
-          return val ? true : null; 
         }
       });
 
       state.addTransition(trans);
-
 
       /*
        * Transition: Idle to Idle
@@ -326,7 +312,54 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
 
       // put state and transitions here
 
+      /* 
+       * State to transfer to well we wait a user response
+       */
+      leaveState = new qx.util.fsm.State("State_Leave",
+      {
+        "context" : this,
 
+        "onentry" : function(fsm, event)
+        {
+          // If the user leaves the page with unsaved changes 
+          // pop a warning message
+          var val = 
+            dialog.Dialog.confirm("You have unsaved changes. Leave Page?",
+            function(result)
+              {
+                //dialog.Dialog.alert("Your answer was: " + result );
+                return result; 
+              }
+            ); 
+
+          // Fire the event the user selected
+          if(val)
+          {
+            fsm.fireImmediateEvent("confirmOk");
+          } 
+          else 
+          {
+             fsm.fireImmediateEvent("confirmCancel"); 
+          } 
+        },
+        "events" :
+        {
+          "confirmOk":
+          {
+            "main.canvas" : 
+              "Transition_Idle_to_Idle_via_disappear"
+          },
+
+          "confirmCancel":
+          {
+            "main.canvas" : 
+              "Transition_Idle_to_AwaitRpcResult_via_appear"
+	  }
+
+        }
+      });
+
+      fsm.addState(leaveState); 
 
 
       // ------------------------------------------------------------ //
