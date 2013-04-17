@@ -28,11 +28,17 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
     /**
      * Return the user's current login information and, optionally a logout
      * URL.
+     * 
+     * This function will check legacy users to see if they have visited their
+     * profile before we started tracking that data. It will write to the DB 
+     * if it finds a user that has been to their profile, but it is currently
+     * belived that they had not been. 
      */
     whoAmI : function()
     {
       var             ret;
       var             me;
+      var             meData; 
       var             whoami;
       
       // Get the object indicating who we're logged in as
@@ -56,7 +62,8 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
       
       // Obtain this dude's Visitor record
       me = new aiagallery.dbif.ObjVisitors(whoami.id);
-      
+      meData = me.getData();      
+
       // Create the return object, initialized to a clone of whoami.
       ret =
         {
@@ -72,15 +79,47 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
                                : []),
           hasSetDisplayName : whoami.hasSetDisplayName,
           isAnonymous       : whoami.isAnonymous,
-          checkedProfile    : me.getData().checkedProfile
+          checkedProfile    : meData.checkedProfile
         };
+
+      // This is legacy code to account for users who existed befre
+      // we tracked if a user had visited their account of not.
+      // Do some quick checks to see if they had in fact visited their profile.
+      // Do this by checking to see if some properties have been changed from
+      // the default. 
+      if (ret["checkedProfile"] == 0)
+      {
+       if(meData.showEmail == 1 ||
+           meData.url == null ||
+           meData.organization == null ||
+           meData.bio == null ||
+           meData.birthYear == null || 
+           meData.birthMonth == null )
+        {
+          meData.checkedProfile = 1;
+          me.put(); 
+        }       
+        else if(meData.showEmail == 1 ||
+           meData.url.length != 0 ||
+           meData.organization.length != 0 ||
+           meData.bio.length != 0 ||
+           meData.birthYear != 0 || 
+           meData.birthMonth.length != 0 )
+        {
+          meData.checkedProfile = 1;
+          me.put(); 
+        } 
+      }
 
       return ret;
     },
 
     /**
      * Retrun the user profile information in the form of a map.
-     * This function operates similiar whoAmI, but will differnt more data
+     * This function operates similiar whoAmI, but will return more data.
+     * 
+     * Executing this function will update the visitor object indicating
+     * the user has visited their profile. 
      * 
      * @return {Map}
      *   A map of all the user data to display in the myself module
@@ -132,6 +171,11 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
           updateOnAppDownload          : meData.updateOnAppDownload,
           updateOnAppDownloadFrequency : meData.updateOnAppDownloadFrequency
         };
+
+      // By executing this function the user has visited their profile page.
+      // In this case update the visitor object to reflect this
+      meData.checkedProfile = 1; 
+      me.put();
 
       return ret;
 

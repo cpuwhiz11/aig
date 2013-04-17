@@ -112,21 +112,21 @@ qx.Class.define("aiagallery.dbif.ObjVisitors",
         "showEmail" : "Integer",
  
         /** 1 to send email if an authored app is commented on 
-	 * (default to 1), 0 0therwise */
+         * (default to 1), 0 0therwise */
         "updateOnAppComment" : "Integer",
 
         /** Frequency to send emails on app comments */
         "updateCommentFrequency" : "Integer", 
 
         /** 1 to send email if an authored app is liked
-	 * (default to 1), 0 0therwise */
+         * (default to 1), 0 0therwise */
         "updateOnAppLike" : "Integer",
 
         /** Frequency to send emails on app likes */
         "updateOnAppLikeFrequency" : "Integer", 
 
         /** 1 to send email if an authored app is downloaded
-	 * (default to 1), 0 0therwise */
+         * (default to 1), 0 0therwise */
         "updateOnAppDownload" : "Integer",
 
         /** Frequency to send emails on app likes */

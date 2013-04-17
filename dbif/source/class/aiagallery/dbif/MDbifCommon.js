@@ -344,6 +344,7 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
         return aiagallery.dbif.MDbifCommon._deepPermissionCheck(methodName);
 
       case "editProfile":
+      case "setCheckedProfile":
         return ! bAnonymous; // Allowed if logged in 
 
       case "managementAllNotifications":

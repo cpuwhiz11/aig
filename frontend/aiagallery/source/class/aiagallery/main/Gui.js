@@ -357,7 +357,7 @@ qx.Class.define("aiagallery.main.Gui",
                 aiagallery.main.Constant.PageName.MyApps,
                 aiagallery.module.dgallery.myapps.MyApps);
 
-              moduleList["My Apps"] = {}; 	
+              moduleList["My Apps"] = {};       
               moduleList["My Apps"]["My Apps"] = module;
 
               // We've instantiated a new module which needs to be added
@@ -389,7 +389,7 @@ qx.Class.define("aiagallery.main.Gui",
                 aiagallery.main.Constant.PageName.User,
                 aiagallery.module.dgallery.user.User);
 
-              moduleList["Profile"] = {}; 	      
+              moduleList["Profile"] = {};             
               moduleList["Profile"]["Profile"] = module;
 
               // We've instantiated a new module which needs to be added
@@ -690,18 +690,43 @@ qx.Class.define("aiagallery.main.Gui",
             {
               dialog.Dialog.confirm(
                 ("You have not edited your profile. Do you want"
-			+ " to go there now and do so."),
+                        + " to go there now and do so?"),
                 function(result)
                 {
+                  var updateRpc;
+
                   if (result)
                   {
                     // Switch to profile page 
                     aiagallery.module.dgallery.userinfo
                       .UserInfo.addPublicUserView(e.displayName); 
                                        
-                  }
-                }, this);
-            }
+                  } 
+                  else
+                  {
+                    // Update checked bit to 1 
+                    // so as to never show this message again
+                    updateRpc = new qx.io.remote.Rpc();
+                    updateRpc.setProtocol("2.0");
+                    updateRpc.set(
+                    {
+                      url         : aiagallery.main.Constant.SERVICES_URL,
+                      timeout     : 30000,
+                      crossDomain : false,
+                      serviceName : "aiagallery.features"
+                    });
+
+                    updateRpc.callAsync(
+                      function(e)
+                      {
+                        // Do nothing
+                        return; 
+                      }
+                    , "setCheckedProfile"); 
+                    
+                  } 
+                });
+            } 
           },
           "whoAmI",
           []);

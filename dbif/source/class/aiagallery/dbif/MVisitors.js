@@ -41,6 +41,10 @@ qx.Mixin.define("aiagallery.dbif.MVisitors",
     this.registerService("aiagallery.features.managementAllNotifications",
                          this.managementAllNotifications,
                          [ "bNotifications" ]);
+
+    this.registerService("aiagallery.features.setCheckedProfile",
+                         this.setCheckedProfile,
+                         []);
   },
   
   statics :
@@ -690,6 +694,41 @@ qx.Mixin.define("aiagallery.dbif.MVisitors",
       return true; 
     },
     
+    /**
+     * A user has checked their profile or has indicated they 
+     * do not want to be notified about it again.
+     * 
+     * @param error {Error}
+     *   The error object 
+     */
+    setCheckedProfile : function(error)
+    {
+      var     whoami;
+      var     me;
+      var     meData;
+
+      // Get the current user 
+      whoami = this.getWhoAmI();
+
+      // Are they logged in?
+      if (!whoami)
+      {
+        // User not logged in 
+        error.setCode(2);
+        error.setMessage("User not logged in");
+        return error;   
+      }
+      
+      // Obtain this dude's Visitor record
+      me = new aiagallery.dbif.ObjVisitors(whoami.id);
+      meData = me.getData();    
+
+      meData.checkedProfile = 1;
+      me.put(); 
+
+      return true;
+    },
+
     /**
      * Check to ensure a name is valid. A name must be:
      * 1. Unique
