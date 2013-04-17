@@ -82,11 +82,14 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
           checkedProfile    : meData.checkedProfile
         };
 
-      // This is legacy code to account for users who existed befre
-      // we tracked if a user had visited their account of not.
-      // Do some quick checks to see if they had in fact visited their profile.
-      // Do this by checking to see if some properties have been changed from
-      // the default. 
+      // In all cases a user who has never visited their profile will either
+      // do so immediately or not wished to be notified again. So in all cases
+      // the visitor object property checkedProfile should be updated to 1.
+      //
+      // In some legacy cases visitor objects existed before we tracked
+      // if they had visited their profile or not. Run some simple checks here
+      // to see if they had visited their profile. If so change the return
+      // object to prevent them being bothered. 
       if (ret["checkedProfile"] == 0)
       {
        if(meData.showEmail == 1 ||
@@ -96,8 +99,7 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
            meData.birthYear == null || 
            meData.birthMonth == null )
         {
-          meData.checkedProfile = 1;
-          me.put(); 
+          //ret["checkedProfile"] = 1; 
         }       
         else if(meData.showEmail == 1 ||
            meData.url.length != 0 ||
@@ -106,10 +108,12 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
            meData.birthYear != 0 || 
            meData.birthMonth.length != 0 )
         {
-          meData.checkedProfile = 1;
-          me.put(); 
+          //ret["checkedProfile"] = 1; 
         } 
-      }
+
+        meData.checkedProfile = 1;
+        me.put();   
+      }     
 
       return ret;
     },
@@ -174,8 +178,11 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
 
       // By executing this function the user has visited their profile page.
       // In this case update the visitor object to reflect this
-      meData.checkedProfile = 1; 
-      me.put();
+      if (meData.checkedProfile == 1)
+      {
+        meData.checkedProfile = 1; 
+        me.put();
+      }
 
       return ret;
 

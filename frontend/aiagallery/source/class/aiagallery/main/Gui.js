@@ -698,32 +698,10 @@ qx.Class.define("aiagallery.main.Gui",
                   if (result)
                   {
                     // Switch to profile page 
-                    aiagallery.module.dgallery.userinfo
-                      .UserInfo.addPublicUserView(e.displayName); 
-                                       
-                  } 
-                  else
-                  {
-                    // Update checked bit to 1 
-                    // so as to never show this message again
-                    updateRpc = new qx.io.remote.Rpc();
-                    updateRpc.setProtocol("2.0");
-                    updateRpc.set(
-                    {
-                      url         : aiagallery.main.Constant.SERVICES_URL,
-                      timeout     : 30000,
-                      crossDomain : false,
-                      serviceName : "aiagallery.features"
-                    });
-
-                    updateRpc.callAsync(
-                      function(e)
+                    aiagallery.main.Gui.getInstance().selectModule(
                       {
-                        // Do nothing
-                        return; 
-                      }
-                    , "setCheckedProfile"); 
-                    
+                        page : aiagallery.main.Constant.PageName.User
+                      });       
                   } 
                 });
             } 
