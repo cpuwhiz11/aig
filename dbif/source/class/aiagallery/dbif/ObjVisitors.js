@@ -39,8 +39,8 @@ qx.Class.define("aiagallery.dbif.ObjVisitors",
           "updateOnAppLike"              : 1,
           "updateOnAppLikeFrequency"     : 0,
           "updateOnAppDownload"          : 1, 
-          "updateOnAppDownloadFrequency" : 0
-          
+          "updateOnAppDownloadFrequency" : 0,
+          "checkedProfile"               : 0
         });
     }
 
@@ -130,7 +130,10 @@ qx.Class.define("aiagallery.dbif.ObjVisitors",
         "updateOnAppDownload" : "Integer",
 
         /** Frequency to send emails on app likes */
-        "updateOnAppDownloadFrequency" : "Integer"
+        "updateOnAppDownloadFrequency" : "Integer",
+
+        /** Has this user checked their profile atleast once */
+        "checkedProfile" : "Integer"
 
       };
       

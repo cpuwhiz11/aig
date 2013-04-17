@@ -74,7 +74,8 @@ qx.Mixin.define("aiagallery.dbif.MSimData",
           "permissionGroups" : ["SOME"],
           "status" : 2,
           "recentSearches" : [],
-          "recentViews" : []
+          "recentViews" : [],
+          "checkedProfile" : 0
         },
         "1002" : 
         {

@@ -683,6 +683,25 @@ qx.Class.define("aiagallery.main.Gui",
             // Add listener to detect page changes
             mainTabs.addListener("changeSelection", 
                                  _this.__onTabSelectionChanged);
+
+            // If the user is logged in and has not updated their profile
+            // Pop a message to remind them to do so.
+            if (!e.isAnonymous && e.checkedProfile == 0)
+            {
+              dialog.Dialog.confirm(
+                ("You have not edited your profile. Do you want"
+			+ " to go there now and do so."),
+                function(result)
+                {
+                  if (result)
+                  {
+                    // Switch to profile page 
+                    aiagallery.module.dgallery.userinfo
+                      .UserInfo.addPublicUserView(e.displayName); 
+                                       
+                  }
+                }, this);
+            }
           },
           "whoAmI",
           []);
