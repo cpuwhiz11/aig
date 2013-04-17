@@ -90,7 +90,7 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
       // if they had visited their profile or not. Run some simple checks here
       // to see if they had visited their profile. If so change the return
       // object to prevent them being bothered. 
-      if (ret["checkedProfile"] == 0)
+      if (ret["isAnonymous"] == false && ret["checkedProfile"] == 0)
       {
        if(meData.showEmail == 1 ||
            meData.url == null ||
@@ -99,7 +99,7 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
            meData.birthYear == null || 
            meData.birthMonth == null )
         {
-          //ret["checkedProfile"] = 1; 
+          ret["checkedProfile"] = 1;  
         }       
         else if(meData.showEmail == 1 ||
            meData.url.length != 0 ||
@@ -108,7 +108,7 @@ qx.Mixin.define("aiagallery.dbif.MWhoAmI",
            meData.birthYear != 0 || 
            meData.birthMonth.length != 0 )
         {
-          //ret["checkedProfile"] = 1; 
+          ret["checkedProfile"] = 1; 
         } 
 
         meData.checkedProfile = 1;
