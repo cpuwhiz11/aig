@@ -688,22 +688,13 @@ qx.Class.define("aiagallery.main.Gui",
             // Pop a message to remind them to do so.
             if (!e.isAnonymous && e.checkedProfile == 0)
             {
-              dialog.Dialog.confirm(
-                ("You have not edited your profile. Do you want"
-                        + " to go there now and do so?"),
-                function(result)
-                {
-                  var updateRpc;
+              dialog.Dialog.alert( _this.tr("We have recently added a profile page. Tell us about yourself"));
 
-                  if (result)
-                  {
-                    // Switch to profile page 
-                    aiagallery.main.Gui.getInstance().selectModule(
-                      {
-                        page : aiagallery.main.Constant.PageName.User
-                      });       
-                  } 
-                });
+              // Switch to profile page 
+              aiagallery.main.Gui.getInstance().selectModule(
+                {
+                  page : aiagallery.main.Constant.PageName.User
+                });       
             } 
           },
           "whoAmI",
